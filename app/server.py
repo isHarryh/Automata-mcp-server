@@ -159,6 +159,7 @@ class AutomataMCPServer:
     @with_exception_handling("dependency_installation")
     def install_dependencies_for_enabled_tools(self):
         """Install dependencies for all tools with improved error handling."""
+        logger.info("Installing dependencies for all the enabled tools")
         # 遍历每个工具目录
         for tools_dir in self.tools_dirs:
             try:
@@ -191,15 +192,20 @@ class AutomataMCPServer:
         config_path = tool_dir / "config.yaml"
         config = self._load_tool_config(config_path, modname)
 
+        if not config.get("enabled", True):
+            logger.info(f"Skipped package installation tool {modname} (tool not enabled)")
+            return
+
         packages = config.get("packages", [])
         if not packages:
+            logger.info(f"Skipped package installation for tool {modname} (no packages specified)")
             return
 
         logger.debug(f"Installing packages for tool {modname}: {packages}")
 
         try:
             self._run_pip_install(packages, tool_dir.parent.parent)
-            logger.debug(f"Successfully installed packages for {modname}")
+            logger.info(f"Successfully installed packages for {modname}")
         except subprocess.CalledProcessError as e:
             error_msg = f"Failed to install packages for {modname}"
             raise DependencyInstallError(
