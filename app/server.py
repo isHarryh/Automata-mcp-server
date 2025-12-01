@@ -127,6 +127,7 @@ class AutomataMCPServer:
             self.tools_dirs.append(self.extension_dir)
         self.install_dependencies_for_enabled_tools()
         self.discover_tools()
+
         # Initialize FastApiMCP
         self.mcp = FastApiMCP(self.app)
         self.mcp.mount_http()
@@ -285,20 +286,37 @@ class AutomataMCPServer:
     def discover_tools(self):
         """Automatically discover tools with improved error handling."""
         for tools_dir in self.tools_dirs:
-            try:
-                if not tools_dir.is_dir():
-                    continue
-                for item in tools_dir.iterdir():
-                    if not (item.is_dir() and (item / "__init__.py").exists()):
-                        continue
+            if not tools_dir.is_dir():
+                continue
+            logger.info(f"Discovering tools in directory: {tools_dir}")
 
-                    modname = item.name
-                    self._load_and_register_tool(item, modname, tools_dir)
-            except Exception as e:
-                handle_exception(e, {"tools_dir": str(tools_dir)})
+            for single_tool_dir in tools_dir.iterdir():
+                if not single_tool_dir.is_dir():
+                    continue
+                if single_tool_dir.name.startswith("_") or single_tool_dir.name.startswith("."):
+                    continue
+                if not (single_tool_dir / "__init__.py").exists():
+                    logger.warning(f"Invalid tool directory {single_tool_dir} (missing __init__.py)")
+                    continue
+
+                modname = single_tool_dir.name
+
+                try:
+                    self._load_and_register_tool(single_tool_dir, modname, tools_dir)
+                except Exception as e:
+                    handle_exception(e, {"tools_dir": str(tools_dir / single_tool_dir)})
+
+        logger.info(f"Tools registering done")
 
     def _load_and_register_tool(self, tool_dir: Path, modname: str, tools_dir: Path):
-        """加载并注册工具"""
+        """加载并注册工具，需处理抛出的错误"""
+        config_path = tool_dir / "config.yaml"
+        config = self._load_tool_config(config_path, modname)
+
+        if not config.get("enabled", True):
+            logger.info(f"Skipped tool registering {modname} (tool not enabled)")
+            return
+
         tool_file = tool_dir / f"{modname}_tool.py"
         if not tool_file.exists():
             error_msg = f"Tool file not found: {tool_file}"
