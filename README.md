@@ -14,14 +14,9 @@
 
 ### 1. 安装依赖
 
-使用 uv（推荐）：
+使用 uv（推荐）
 ```bash
 uv sync
-```
-
-或使用 pip：
-```bash
-pip install -r requirements.txt
 ```
 
 **📝 依赖管理说明**：
@@ -37,12 +32,7 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-编辑 `.env` 文件，设置必要的配置项：
-```bash
-HOST=localhost
-PORT=8000
-AUTOMATA_API_KEY=your_api_key_here
-```
+编辑 `.env` 文件，设置必要的配置项。
 
 ### 3. 启动服务器
 

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 同步 pyproject.toml 和 requirements.txt 的依赖
 """

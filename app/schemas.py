@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, Generic, TypeVar
+from typing import ClassVar, Generic, TypeVar
 
 from pydantic import BaseModel
 

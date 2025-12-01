@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Sequence, Type
+from typing import Sequence
 
 from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
-from pydantic import BaseModel
 
 from .schemas import BaseResponse
 
